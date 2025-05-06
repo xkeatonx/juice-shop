@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core'
-import { HttpClientTestingModule } from '@angular/common/http/testing'
+import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { MatCardModule } from '@angular/material/card'
 import { MatFormFieldModule } from '@angular/material/form-field'
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { type ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 import { MatInputModule } from '@angular/material/input'
 import { ReactiveFormsModule } from '@angular/forms'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
@@ -22,6 +22,7 @@ import { PaymentMethodComponent } from '../payment-method/payment-method.compone
 import { EventEmitter } from '@angular/core'
 import { of } from 'rxjs'
 import { MatSnackBar } from '@angular/material/snack-bar'
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 describe('SavedPaymentMethodsComponent', () => {
   let component: SavedPaymentMethodsComponent
@@ -38,11 +39,8 @@ describe('SavedPaymentMethodsComponent', () => {
     snackBar = jasmine.createSpyObj('MatSnackBar', ['open'])
 
     TestBed.configureTestingModule({
-      imports: [
-        TranslateModule.forRoot(),
-        HttpClientTestingModule,
+      imports: [TranslateModule.forRoot(),
         ReactiveFormsModule,
-
         BrowserAnimationsModule,
         MatCardModule,
         MatTableModule,
@@ -51,12 +49,13 @@ describe('SavedPaymentMethodsComponent', () => {
         MatExpansionModule,
         MatDividerModule,
         MatRadioModule,
-        MatDialogModule
-      ],
-      declarations: [SavedPaymentMethodsComponent, PaymentMethodComponent],
+        MatDialogModule,
+        SavedPaymentMethodsComponent, PaymentMethodComponent],
       providers: [
         { provide: TranslateService, useValue: translateService },
-        { provide: MatSnackBar, useValue: snackBar }
+        { provide: MatSnackBar, useValue: snackBar },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
       ]
     })
       .compileComponents()

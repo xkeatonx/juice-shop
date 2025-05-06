@@ -1,19 +1,21 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
-import vm = require('vm')
-import { Request, Response, NextFunction } from 'express'
+import vm from 'node:vm'
+import { type Request, type Response, type NextFunction } from 'express'
+// @ts-expect-error FIXME due to non-existing type definitions for notevil
+import { eval as safeEval } from 'notevil'
 
-const utils = require('../lib/utils')
-const security = require('../lib/insecurity')
-const safeEval = require('notevil')
-const challenges = require('../data/datacache').challenges
+import * as challengeUtils from '../lib/challengeUtils'
+import { challenges } from '../data/datacache'
+import * as security from '../lib/insecurity'
+import * as utils from '../lib/utils'
 
-module.exports = function b2bOrder () {
+export function b2bOrder () {
   return ({ body }: Request, res: Response, next: NextFunction) => {
-    if (!utils.disableOnContainerEnv()) {
+    if (utils.isChallengeEnabled(challenges.rceChallenge) || utils.isChallengeEnabled(challenges.rceOccupyChallenge)) {
       const orderLinesData = body.orderLinesData || ''
       try {
         const sandbox = { safeEval, orderLinesData }
@@ -21,12 +23,12 @@ module.exports = function b2bOrder () {
         vm.runInContext('safeEval(orderLinesData)', sandbox, { timeout: 2000 })
         res.json({ cid: body.cid, orderNo: uniqueOrderNumber(), paymentDue: dateTwoWeeksFromNow() })
       } catch (err) {
-        if (utils.getErrorMessage(err).match(/Script execution timed out.*/)) {
-          utils.solveIf(challenges.rceOccupyChallenge, () => { return true })
+        if (utils.getErrorMessage(err).match(/Script execution timed out.*/) != null) {
+          challengeUtils.solveIf(challenges.rceOccupyChallenge, () => { return true })
           res.status(503)
           next(new Error('Sorry, we are temporarily not available! Please try again later.'))
         } else {
-          utils.solveIf(challenges.rceChallenge, () => { return utils.getErrorMessage(err) === 'Infinite loop detected - reached max iterations' })
+          challengeUtils.solveIf(challenges.rceChallenge, () => { return utils.getErrorMessage(err) === 'Infinite loop detected - reached max iterations' })
           next(err)
         }
       }
@@ -36,7 +38,7 @@ module.exports = function b2bOrder () {
   }
 
   function uniqueOrderNumber () {
-    return security.hash(new Date() + '_B2B')
+    return security.hash(`${(new Date()).toString()}_B2B`)
   }
 
   function dateTwoWeeksFromNow () {

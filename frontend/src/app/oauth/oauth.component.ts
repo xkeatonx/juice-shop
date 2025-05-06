@@ -1,27 +1,31 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
 import { ActivatedRoute, Router } from '@angular/router'
 import { UserService } from '../Services/user.service'
-import { CookieService } from 'ngx-cookie'
-import { Component, NgZone, OnInit } from '@angular/core'
+import { CookieService } from 'ngy-cookie'
+import { Component, NgZone, type OnInit } from '@angular/core'
+import { TranslateModule } from '@ngx-translate/core'
+import { MatCardModule } from '@angular/material/card'
+import { FlexModule } from '@angular/flex-layout/flex'
 
 @Component({
   selector: 'app-oauth',
   templateUrl: './oauth.component.html',
-  styleUrls: ['./oauth.component.scss']
+  styleUrls: ['./oauth.component.scss'],
+  imports: [FlexModule, MatCardModule, TranslateModule]
 })
 export class OAuthComponent implements OnInit {
   constructor (private readonly cookieService: CookieService, private readonly userService: UserService, private readonly router: Router, private readonly route: ActivatedRoute, private readonly ngZone: NgZone) { }
 
-  ngOnInit () {
+  ngOnInit (): void {
     this.userService.oauthLogin(this.parseRedirectUrlParams().access_token).subscribe((profile: any) => {
       const password = btoa(profile.email.split('').reverse().join(''))
-      this.userService.save({ email: profile.email, password: password, passwordRepeat: password }).subscribe(() => {
+      this.userService.save({ email: profile.email, password, passwordRepeat: password }).subscribe(() => {
         this.login(profile)
-      }, () => this.login(profile))
+      }, () => { this.login(profile) })
     }, (error) => {
       this.invalidateSession(error)
       this.ngZone.run(async () => await this.router.navigate(['/login']))

@@ -1,9 +1,10 @@
-import { NextFunction, Request, Response } from 'express'
+import fs from 'node:fs'
+import yaml from 'js-yaml'
+import { type NextFunction, type Request, type Response } from 'express'
 
-const accuracy = require('../lib/accuracy')
-const utils = require('../lib/utils')
-const fs = require('fs')
-const yaml = require('js-yaml')
+import * as accuracy from '../lib/accuracy'
+import * as challengeUtils from '../lib/challengeUtils'
+import { type ChallengeKey } from 'models/challenge'
 
 const FixesDir = 'data/static/codefixes'
 
@@ -12,9 +13,7 @@ interface codeFix {
   correct: number
 }
 
-interface cache {
-  [index: string]: codeFix
-}
+type cache = Record<string, codeFix>
 
 const CodeFixes: cache = {}
 
@@ -39,8 +38,8 @@ export const readFixes = (key: string) => {
   }
 
   CodeFixes[key] = {
-    fixes: fixes,
-    correct: correct
+    fixes,
+    correct
   }
   return CodeFixes[key]
 }
@@ -50,11 +49,11 @@ interface FixesRequestParams {
 }
 
 interface VerdictRequestBody {
-  key: string
+  key: ChallengeKey
   selectedFix: number
 }
 
-export const serveCodeFixes = () => (req: Request<FixesRequestParams, {}, {}>, res: Response, next: NextFunction) => {
+export const serveCodeFixes = () => (req: Request<FixesRequestParams, Record<string, unknown>, Record<string, unknown>>, res: Response, next: NextFunction) => {
   const key = req.params.key
   const fixData = readFixes(key)
   if (fixData.fixes.length === 0) {
@@ -68,7 +67,7 @@ export const serveCodeFixes = () => (req: Request<FixesRequestParams, {}, {}>, r
   })
 }
 
-export const checkCorrectFix = () => async (req: Request<{}, {}, VerdictRequestBody>, res: Response, next: NextFunction) => {
+export const checkCorrectFix = () => async (req: Request<Record<string, unknown>, Record<string, unknown>, VerdictRequestBody>, res: Response, next: NextFunction) => {
   const key = req.body.key
   const selectedFix = req.body.selectedFix
   const fixData = readFixes(key)
@@ -84,7 +83,7 @@ export const checkCorrectFix = () => async (req: Request<{}, {}, VerdictRequestB
       if (selectedFixInfo?.explanation) explanation = res.__(selectedFixInfo.explanation)
     }
     if (selectedFix === fixData.correct) {
-      await utils.solveFixIt(key)
+      await challengeUtils.solveFixIt(key)
       res.status(200).json({
         verdict: true,
         explanation

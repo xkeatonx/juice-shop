@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
@@ -10,7 +10,7 @@ import {
   waitInMs,
   waitForAngularRouteToBeVisited, waitForLogOut
 } from '../helpers/helpers'
-import { ChallengeInstruction } from '../'
+import { type ChallengeInstruction } from '../'
 
 export const LoginAdminInstruction: ChallengeInstruction = {
   name: 'Login Admin',
@@ -69,7 +69,7 @@ export const LoginAdminInstruction: ChallengeInstruction = {
       resolved: waitInMs(10000)
     },
     {
-      text: 'Did you spot the error message with the `SQLITE_ERROR` and the entire SQL query in the 500 response to `/login`? If not, keep the network tab open and click _Log in_ again. Then inspect the occuring response closely.',
+      text: 'Did you spot the error message with the `SQLITE_ERROR` and the entire SQL query in the 500 response to `/login`? If not, keep the network tab open and click _Log in_ again. Then inspect the occurring response closely.',
       fixture: '#rememberMe',
       resolved: waitInMs(30000)
     },

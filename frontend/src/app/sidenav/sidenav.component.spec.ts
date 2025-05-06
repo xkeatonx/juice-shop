@@ -1,17 +1,17 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
 import { ChallengeService } from '../Services/challenge.service'
-import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing'
+import { type ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing'
 import { SocketIoService } from '../Services/socket-io.service'
 import { ConfigurationService } from '../Services/configuration.service'
 import { TranslateModule, TranslateService } from '@ngx-translate/core'
 import { RouterTestingModule } from '@angular/router/testing'
 import { of } from 'rxjs'
-import { HttpClientModule } from '@angular/common/http'
-import { CookieModule, CookieService } from 'ngx-cookie'
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
+import { CookieModule, CookieService } from 'ngy-cookie'
 import { LoginGuard } from '../app.guard'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { SidenavComponent } from './sidenav.component'
@@ -26,7 +26,7 @@ import { UserService } from '../Services/user.service'
 import { Location } from '@angular/common'
 
 class MockSocket {
-  on (str: string, callback: Function) {
+  on (str: string, callback: any) {
     callback(str)
   }
 }
@@ -65,10 +65,7 @@ describe('SidenavComponent', () => {
     loginGuard.tokenDecode.and.returnValue({})
 
     TestBed.configureTestingModule({
-      declarations: [SidenavComponent],
-      imports: [
-        HttpClientModule,
-        TranslateModule.forRoot(),
+      imports: [TranslateModule.forRoot(),
         BrowserAnimationsModule,
         MatToolbarModule,
         MatIconModule,
@@ -76,8 +73,8 @@ describe('SidenavComponent', () => {
         MatMenuModule,
         MatListModule,
         CookieModule.forRoot(),
-        RouterTestingModule
-      ],
+        RouterTestingModule,
+        SidenavComponent],
       providers: [
         { provide: ConfigurationService, useValue: configurationService },
         { provide: ChallengeService, useValue: challengeService },
@@ -86,7 +83,8 @@ describe('SidenavComponent', () => {
         { provide: CookieService, useValue: cookieService },
         { provide: SocketIoService, useValue: socketIoService },
         { provide: LoginGuard, useValue: loginGuard },
-        TranslateService
+        TranslateService,
+        provideHttpClient(withInterceptorsFromDi())
       ]
     })
       .compileComponents()

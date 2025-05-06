@@ -1,31 +1,42 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
 import { UserService } from '../Services/user.service'
 import { SecurityQuestionService } from '../Services/security-question.service'
-import { AbstractControl, FormControl, Validators } from '@angular/forms'
+import { type AbstractControl, UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { Component } from '@angular/core'
-import { dom, library } from '@fortawesome/fontawesome-svg-core'
+import { library } from '@fortawesome/fontawesome-svg-core'
 import { faSave } from '@fortawesome/free-solid-svg-icons'
 import { faEdit } from '@fortawesome/free-regular-svg-icons'
-import { SecurityQuestion } from '../Models/securityQuestion.model'
-import { TranslateService } from '@ngx-translate/core'
+import { type SecurityQuestion } from '../Models/securityQuestion.model'
+import { TranslateService, TranslateModule } from '@ngx-translate/core'
+import { MatButtonModule } from '@angular/material/button'
+import { PasswordStrengthComponent } from '../password-strength/password-strength.component'
+import { PasswordStrengthInfoComponent } from '../password-strength-info/password-strength-info.component'
+import { MatSlideToggle } from '@angular/material/slide-toggle'
+import { NgIf } from '@angular/common'
+import { MatTooltip } from '@angular/material/tooltip'
+import { MatIconModule } from '@angular/material/icon'
+import { MatInputModule } from '@angular/material/input'
+import { MatFormFieldModule, MatLabel, MatSuffix, MatError, MatHint } from '@angular/material/form-field'
+import { MatCardModule } from '@angular/material/card'
+import { FlexModule } from '@angular/flex-layout/flex'
 
 library.add(faSave, faEdit)
-dom.watch()
 
 @Component({
   selector: 'app-forgot-password',
   templateUrl: './forgot-password.component.html',
-  styleUrls: ['./forgot-password.component.scss']
+  styleUrls: ['./forgot-password.component.scss'],
+  imports: [FlexModule, MatCardModule, TranslateModule, MatFormFieldModule, MatLabel, MatInputModule, FormsModule, ReactiveFormsModule, MatIconModule, MatSuffix, MatTooltip, NgIf, MatError, MatHint, MatSlideToggle, PasswordStrengthComponent, PasswordStrengthInfoComponent, MatButtonModule]
 })
 export class ForgotPasswordComponent {
-  public emailControl: FormControl = new FormControl('', [Validators.required, Validators.email])
-  public securityQuestionControl: FormControl = new FormControl({ disabled: true, value: '' }, [Validators.required])
-  public passwordControl: FormControl = new FormControl({ disabled: true, value: '' }, [Validators.required, Validators.minLength(5)])
-  public repeatPasswordControl: FormControl = new FormControl({ disabled: true, value: '' }, [Validators.required, matchValidator(this.passwordControl)])
+  public emailControl: UntypedFormControl = new UntypedFormControl('', [Validators.required, Validators.email])
+  public securityQuestionControl: UntypedFormControl = new UntypedFormControl({ disabled: true, value: '' }, [Validators.required])
+  public passwordControl: UntypedFormControl = new UntypedFormControl({ disabled: true, value: '' }, [Validators.required, Validators.minLength(5)])
+  public repeatPasswordControl: UntypedFormControl = new UntypedFormControl({ disabled: true, value: '' }, [Validators.required, matchValidator(this.passwordControl)])
   public securityQuestion?: string
   public error?: string
   public confirmation?: string
@@ -113,7 +124,7 @@ export class ForgotPasswordComponent {
 }
 
 function matchValidator (passwordControl: AbstractControl) {
-  return function matchOtherValidate (repeatPasswordControl: FormControl) {
+  return function matchOtherValidate (repeatPasswordControl: UntypedFormControl) {
     const password = passwordControl.value
     const passwordRepeat = repeatPasswordControl.value
     if (password !== passwordRepeat) {

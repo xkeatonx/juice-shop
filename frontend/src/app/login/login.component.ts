@@ -1,44 +1,59 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
-import { CookieService } from 'ngx-cookie'
+import { CookieService } from 'ngy-cookie'
 import { WindowRefService } from '../Services/window-ref.service'
-import { Router } from '@angular/router'
-import { Component, NgZone, OnInit } from '@angular/core'
-import { FormControl, Validators } from '@angular/forms'
-import { dom, library } from '@fortawesome/fontawesome-svg-core'
+import { Router, RouterLink } from '@angular/router'
+import { Component, NgZone, type OnInit } from '@angular/core'
+import { UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { library } from '@fortawesome/fontawesome-svg-core'
 import { UserService } from '../Services/user.service'
 import { faEye, faEyeSlash, faKey } from '@fortawesome/free-solid-svg-icons'
 import { faGoogle } from '@fortawesome/free-brands-svg-icons'
 import { FormSubmitService } from '../Services/form-submit.service'
 import { ConfigurationService } from '../Services/configuration.service'
 import { BasketService } from '../Services/basket.service'
+import { MatCheckbox } from '@angular/material/checkbox'
+import { MatIconModule } from '@angular/material/icon'
+import { MatTooltip } from '@angular/material/tooltip'
+import { MatIconButton, MatButtonModule } from '@angular/material/button'
+import { MatInputModule } from '@angular/material/input'
+import { TranslateModule } from '@ngx-translate/core'
+import { MatFormFieldModule, MatLabel, MatError, MatSuffix } from '@angular/material/form-field'
+import { NgIf } from '@angular/common'
+import { MatCardModule } from '@angular/material/card'
+import { FlexModule } from '@angular/flex-layout/flex'
 
 library.add(faKey, faEye, faEyeSlash, faGoogle)
-dom.watch()
 
 const oauthProviderUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  styleUrls: ['./login.component.scss'],
+  imports: [FlexModule, MatCardModule, NgIf, MatFormFieldModule, MatLabel, TranslateModule, MatInputModule, FormsModule, ReactiveFormsModule, MatError, MatIconButton, MatSuffix, MatTooltip, RouterLink, MatButtonModule, MatIconModule, MatCheckbox]
 })
+
 export class LoginComponent implements OnInit {
-  public emailControl = new FormControl('', [Validators.required])
-  public passwordControl = new FormControl('', [Validators.required])
+  public emailControl = new UntypedFormControl('', [Validators.required])
+
+  public passwordControl = new UntypedFormControl('', [Validators.required, Validators.minLength(1)])
+
   public hide = true
   public user: any
-  public rememberMe: FormControl = new FormControl(false)
+  public rememberMe: UntypedFormControl = new UntypedFormControl(false)
   public error: any
   public clientId = '1005568560502-6hm16lef8oh46hr2d98vf2ohlnj4nfhq.apps.googleusercontent.com'
   public oauthUnavailable: boolean = true
   public redirectUri: string = ''
+  public testingUsername = 'testing@juice-sh.op'
+  public testingPassword = 'IamUsedForTesting'
   constructor (private readonly configurationService: ConfigurationService, private readonly userService: UserService, private readonly windowRefService: WindowRefService, private readonly cookieService: CookieService, private readonly router: Router, private readonly formSubmitService: FormSubmitService, private readonly basketService: BasketService, private readonly ngZone: NgZone) { }
 
-  ngOnInit () {
+  ngOnInit (): void {
     const email = localStorage.getItem('email')
     if (email) {
       this.user = {}
@@ -62,9 +77,9 @@ export class LoginComponent implements OnInit {
           console.log(this.redirectUri + ' is not an authorized redirect URI for this application.')
         }
       }
-    }, (err) => console.log(err))
+    }, (err) => { console.log(err) })
 
-    this.formSubmitService.attachEnterKeyHandler('login-form', 'loginButton', () => this.login())
+    this.formSubmitService.attachEnterKeyHandler('login-form', 'loginButton', () => { this.login() })
   }
 
   login () {

@@ -1,20 +1,20 @@
+import fs from 'node:fs'
+import colors from 'colors/safe'
+import { diffLines, structuredPatch } from 'diff'
+
 import { retrieveCodeSnippet } from '../routes/vulnCodeSnippet'
-const Diff = require('diff')
-const fs = require('fs')
+
 const fixesPath = 'data/static/codefixes'
 const cacheFile = 'rsn/cache.json'
-const colors = require('colors/safe')
 
-interface CacheData {
-  [key: string]: {
-    added: number[]
-    removed: number[]
-  }
-}
+type CacheData = Record<string, {
+  added: number[]
+  removed: number[]
+}>
 
 function readFiles () {
   const files = fs.readdirSync(fixesPath)
-  const keys = files.filter((file: string) => file.endsWith('.ts'))
+  const keys = files.filter((file: string) => !file.endsWith('.info.yml') && !file.endsWith('.editorconfig'))
   return keys
 }
 
@@ -43,24 +43,26 @@ const checkDiffs = async (keys: string[]) => {
     }
   }, {})
   for (const val of keys) {
-    await retrieveCodeSnippet(val.split('_')[0], true)
+    await retrieveCodeSnippet(val.split('_')[0])
       .then(snippet => {
+        if (snippet == null) return
         process.stdout.write(val + ': ')
         const fileData = fs.readFileSync(fixesPath + '/' + val).toString()
-        const diff = Diff.diffLines(filterString(fileData), filterString(snippet.snippet))
+        const diff = diffLines(filterString(fileData), filterString(snippet.snippet))
         let line = 0
         for (const part of diff) {
+          if (!part.count) continue
           if (part.removed) continue
           const prev = line
           line += part.count
           if (!(part.added)) continue
           for (let i = 0; i < part.count; i++) {
             if (!snippet.vulnLines.includes(prev + i + 1) && !snippet.neutralLines.includes(prev + i + 1)) {
-              process.stdout.write(colors.red.inverse(prev + i + 1 + ''))
+              process.stdout.write(colors.red(colors.inverse(prev + i + 1 + '')))
               process.stdout.write(' ')
               data[val].added.push(prev + i + 1)
             } else if (snippet.vulnLines.includes(prev + i + 1)) {
-              process.stdout.write(colors.red.bold(prev + i + 1 + ' '))
+              process.stdout.write(colors.red(colors.bold(prev + i + 1 + ' ')))
             } else if (snippet.neutralLines.includes(prev + i + 1)) {
               process.stdout.write(colors.red(prev + i + 1 + ' '))
             }
@@ -69,6 +71,7 @@ const checkDiffs = async (keys: string[]) => {
         line = 0
         let norm = 0
         for (const part of diff) {
+          if (!part.count) continue
           if (part.added) {
             norm--
             continue
@@ -79,11 +82,11 @@ const checkDiffs = async (keys: string[]) => {
           let temp = norm
           for (let i = 0; i < part.count; i++) {
             if (!snippet.vulnLines.includes(prev + i + 1 - norm) && !snippet.neutralLines.includes(prev + i + 1 - norm)) {
-              process.stdout.write(colors.green.inverse((prev + i + 1 - norm + '')))
+              process.stdout.write(colors.green(colors.inverse((prev + i + 1 - norm + ''))))
               process.stdout.write(' ')
               data[val].removed.push(prev + i + 1 - norm)
             } else if (snippet.vulnLines.includes(prev + i + 1 - norm)) {
-              process.stdout.write(colors.green.bold(prev + i + 1 - norm + ' '))
+              process.stdout.write(colors.green(colors.bold(prev + i + 1 - norm + ' ')))
             } else if (snippet.neutralLines.includes(prev + i + 1 - norm)) {
               process.stdout.write(colors.green(prev + i + 1 - norm + ' '))
             }
@@ -102,8 +105,9 @@ const checkDiffs = async (keys: string[]) => {
 
 async function seePatch (file: string) {
   const fileData = fs.readFileSync(fixesPath + '/' + file).toString()
-  const snippet = await retrieveCodeSnippet(file.split('_')[0], true)
-  const patch = Diff.structuredPatch(file, file, filterString(snippet.snippet), filterString(fileData))
+  const snippet = await retrieveCodeSnippet(file.split('_')[0])
+  if (snippet == null) return
+  const patch = structuredPatch(file, file, filterString(snippet.snippet), filterString(fileData))
   console.log(colors.bold(file + '\n'))
   for (const hunk of patch.hunks) {
     for (const line of hunk.lines) {

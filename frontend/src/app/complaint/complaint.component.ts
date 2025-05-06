@@ -1,36 +1,43 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
 import { environment } from '../../environments/environment'
 import { ComplaintService } from '../Services/complaint.service'
 import { UserService } from '../Services/user.service'
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
-import { FormControl, Validators } from '@angular/forms'
-import { FileUploader } from 'ng2-file-upload'
-import { dom, library } from '@fortawesome/fontawesome-svg-core'
+import { Component, ElementRef, type OnInit, ViewChild } from '@angular/core'
+import { UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { FileUploader, FileUploadModule } from 'ng2-file-upload'
+import { library } from '@fortawesome/fontawesome-svg-core'
 import { faBomb } from '@fortawesome/free-solid-svg-icons'
 import { FormSubmitService } from '../Services/form-submit.service'
-import { TranslateService } from '@ngx-translate/core'
+import { TranslateService, TranslateModule } from '@ngx-translate/core'
+import { MatButtonModule } from '@angular/material/button'
+import { MatInputModule } from '@angular/material/input'
+import { MatFormFieldModule, MatLabel, MatHint, MatError } from '@angular/material/form-field'
+import { NgIf } from '@angular/common'
+import { MatCardModule } from '@angular/material/card'
+import { FlexModule } from '@angular/flex-layout/flex'
+import { MatIconModule } from '@angular/material/icon'
 
 library.add(faBomb)
-dom.watch()
 
 @Component({
   selector: 'app-complaint',
   templateUrl: './complaint.component.html',
-  styleUrls: ['./complaint.component.scss']
+  styleUrls: ['./complaint.component.scss'],
+  imports: [FlexModule, MatCardModule, TranslateModule, NgIf, MatFormFieldModule, MatLabel, MatInputModule, FormsModule, ReactiveFormsModule, MatHint, MatError, FileUploadModule, MatButtonModule, MatIconModule]
 })
 export class ComplaintComponent implements OnInit {
-  public customerControl: FormControl = new FormControl({ value: '', disabled: true }, [])
-  public messageControl: FormControl = new FormControl('', [Validators.required, Validators.maxLength(160)])
+  public customerControl: UntypedFormControl = new UntypedFormControl({ value: '', disabled: true }, [])
+  public messageControl: UntypedFormControl = new UntypedFormControl('', [Validators.required, Validators.maxLength(160)])
   @ViewChild('fileControl', { static: true }) fileControl!: ElementRef // For controlling the DOM Element for file input.
   public fileUploadError: any = undefined // For controlling error handling related to file input.
   public uploader: FileUploader = new FileUploader({
     url: environment.hostServer + '/file-upload',
     authToken: `Bearer ${localStorage.getItem('token')}`,
-    allowedMimeType: ['application/pdf', 'application/xml', 'text/xml', 'application/zip', 'application/x-zip-compressed', 'multipart/x-zip'],
+    allowedMimeType: ['application/pdf', 'application/xml', 'text/xml', 'application/zip', 'application/x-zip-compressed', 'multipart/x-zip', 'application/yaml', 'application/x-yaml', 'text/yaml', 'text/x-yaml'],
     maxFileSize: 100000
   })
 
@@ -40,7 +47,7 @@ export class ComplaintComponent implements OnInit {
 
   constructor (private readonly userService: UserService, private readonly complaintService: ComplaintService, private readonly formSubmitService: FormSubmitService, private readonly translate: TranslateService) { }
 
-  ngOnInit () {
+  ngOnInit (): void {
     this.initComplaint()
     this.uploader.onWhenAddingFileFailed = (item, filter) => {
       this.fileUploadError = filter
@@ -54,7 +61,7 @@ export class ComplaintComponent implements OnInit {
       this.saveComplaint()
       this.uploader.clearQueue()
     }
-    this.formSubmitService.attachEnterKeyHandler('complaint-form', 'submitButton', () => this.save())
+    this.formSubmitService.attachEnterKeyHandler('complaint-form', 'submitButton', () => { this.save() })
   }
 
   initComplaint () {

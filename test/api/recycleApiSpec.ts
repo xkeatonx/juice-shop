@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
-import frisby = require('frisby')
+import * as frisby from 'frisby'
+import * as security from '../../lib/insecurity'
 const Joi = frisby.Joi
-const security = require('../../lib/insecurity')
 
 const API_URL = 'http://localhost:3000/api'
 
@@ -37,6 +37,22 @@ describe('/api/Recycles', () => {
       .expect('header', 'content-type', /application\/json/)
       .expect('jsonTypes', 'data', {
         err: 'Sorry, this endpoint is not supported.'
+      })
+  })
+
+  it('Will GET existing recycle from this endpoint', () => {
+    return frisby.get(`${API_URL}/Recycles/1`)
+      .expect('status', 200)
+      .expect('header', 'content-type', /application\/json/)
+      .expect('jsonTypes', 'data.*', {
+        id: Joi.number(),
+        UserId: Joi.number(),
+        AddressId: Joi.number(),
+        quantity: Joi.number(),
+        isPickup: Joi.boolean(),
+        date: Joi.date(),
+        createdAt: Joi.string(),
+        updatedAt: Joi.string()
       })
   })
 

@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
-import config = require('config')
-const colors = require('colors/safe')
-const logger = require('../logger')
-const utils = require('../utils')
+import config from 'config'
+import logger from '../logger'
+import colors from 'colors/safe'
+import * as utils from '../utils'
 
-const validateChatBot = (trainingData: any, exitOnFailure = true) => {
+export default function validateChatBot (trainingData: any, exitOnFailure = true) {
   let success = true
   success = checkIntentWithFunctionHandlerExists(trainingData, 'queries.couponCode', 'couponCode') && success
   success = checkIntentWithFunctionHandlerExists(trainingData, 'queries.productPrice', 'productPrice') && success
@@ -17,7 +17,7 @@ const validateChatBot = (trainingData: any, exitOnFailure = true) => {
     logger.info(`Chatbot training data ${colors.bold(utils.extractFilename(config.get('application.chatBot.trainingData')))} validated (${colors.green('OK')})`)
   } else {
     logger.warn(`Chatbot training data ${colors.bold(utils.extractFilename(config.get('application.chatBot.trainingData')))} validated (${colors.red('NOT OK')})`)
-    logger.warn(`Visit ${colors.yellow('https://pwning.owasp-juice.shop/appendix/chatbot.html')} for the training data schema definition.`)
+    logger.warn(`Visit ${colors.yellow('https://pwning.owasp-juice.shop/companion-guide/latest/part5/chatbot.html')} for the training data schema definition.`)
     if (exitOnFailure) {
       logger.error(colors.red('Exiting due to configuration errors!'))
       process.exit(1)
@@ -26,7 +26,7 @@ const validateChatBot = (trainingData: any, exitOnFailure = true) => {
   return success
 }
 
-const checkIntentWithFunctionHandlerExists = (trainingData: any, intent: string, handler: string) => {
+export const checkIntentWithFunctionHandlerExists = (trainingData: any, intent: string, handler: string) => {
   let success = true
   const intentData = trainingData.data.filter((data: any) => data.intent === intent)
   if (intentData.length === 0) {
@@ -40,7 +40,3 @@ const checkIntentWithFunctionHandlerExists = (trainingData: any, intent: string,
   }
   return success
 }
-
-validateChatBot.checkIntentWithFunctionHandlerExists = checkIntentWithFunctionHandlerExists
-
-module.exports = validateChatBot

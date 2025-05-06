@@ -1,15 +1,16 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
-import frisby = require('frisby')
-import config = require('config')
-import { Product } from '../../data/types'
-import { IncomingMessage } from 'http'
+import { type IncomingMessage } from 'node:http'
+import * as frisby from 'frisby'
+import http from 'node:http'
+import config from 'config'
+
+import { type Product } from '../../data/types'
+import * as security from '../../lib/insecurity'
 const Joi = frisby.Joi
-const security = require('../../lib/insecurity')
-const http = require('http')
 
 const REST_URL = 'http://localhost:3000/rest'
 
@@ -36,6 +37,11 @@ describe('/rest/products/:id/reviews', () => {
       .expect('status', 200)
       .expect('header', 'content-type', /application\/json/)
       .expect('jsonTypes', reviewResponseSchema)
+  })
+
+  xit('GET product reviews by alphanumeric non-mongoDB-command product id', () => { // FIXME Turn on when #1960 is resolved
+    return frisby.get(`${REST_URL}/products/kaboom/reviews`)
+      .expect('status', 400)
   })
 
   it('PUT single product review can be created', () => {

@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
 import locales from '../data/static/locales.json'
-import fs = require('fs')
-import { Request, Response, NextFunction } from 'express'
+import fs from 'node:fs'
+import { type Request, type Response, type NextFunction } from 'express'
 
-module.exports = function getLanguageList () { // TODO Refactor and extend to also load backend translations from /i18n/*json and calculate joint percentage/gauge
+export function getLanguageList () { // TODO Refactor and extend to also load backend translations from /i18n/*json and calculate joint percentage/gauge
   return (req: Request, res: Response, next: NextFunction) => {
     const languages: Array<{ key: string, lang: any, icons: string[], shortKey: string, percentage: unknown, gauge: string }> = []
     let count = 0
@@ -33,11 +33,11 @@ module.exports = function getLanguageList () { // TODO Refactor and extend to al
             const key = fileName.substring(0, fileName.indexOf('.'))
             const locale = locales.find((l) => l.key === key)
             const lang: any = {
-              key: key,
+              key,
               lang: fileContent.LANGUAGE,
               icons: locale?.icons,
               shortKey: locale?.shortKey,
-              percentage: percentage,
+              percentage,
               gauge: (percentage > 90 ? 'full' : (percentage > 70 ? 'three-quarters' : (percentage > 50 ? 'half' : (percentage > 30 ? 'quarter' : 'empty'))))
             }
             if (!(fileName === 'en.json' || fileName === 'tlh_AA.json')) {

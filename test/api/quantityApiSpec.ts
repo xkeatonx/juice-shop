@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
-import frisby = require('frisby')
-import config = require('config')
+import * as frisby from 'frisby'
+import { expect } from '@jest/globals'
+import config from 'config'
 
 const REST_URL = 'http://localhost:3000/rest'
 const API_URL = 'http://localhost:3000/api'
@@ -16,7 +17,7 @@ describe('/api/Quantitys', () => {
     return frisby.post(`${REST_URL}/user/login`, {
       headers: jsonHeader,
       body: {
-        email: `jim@${config.get('application.domain')}`,
+        email: `jim@${config.get<string>('application.domain')}`,
         password: 'ncc-1701'
       }
     })
@@ -33,7 +34,7 @@ describe('/api/Quantitys', () => {
     return frisby.post(`${REST_URL}/user/login`, {
       headers: jsonHeader,
       body: {
-        email: `admin@${config.get('application.domain')}`,
+        email: `admin@${config.get<string>('application.domain')}`,
         password: 'admin123'
       }
     })
@@ -50,7 +51,7 @@ describe('/api/Quantitys', () => {
     return frisby.post(`${REST_URL}/user/login`, {
       headers: jsonHeader,
       body: {
-        email: `accountant@${config.get('application.domain')}`,
+        email: `accountant@${config.get<string>('application.domain')}`,
         password: 'i am an awesome accountant'
       }
     })
@@ -67,7 +68,7 @@ describe('/api/Quantitys', () => {
     return frisby.post(`${REST_URL}/user/login`, {
       headers: jsonHeader,
       body: {
-        email: `jim@${config.get('application.domain')}`,
+        email: `jim@${config.get<string>('application.domain')}`,
         password: 'ncc-1701'
       }
     })
@@ -88,7 +89,7 @@ describe('/api/Quantitys', () => {
     return frisby.post(`${REST_URL}/user/login`, {
       headers: jsonHeader,
       body: {
-        email: `admin@${config.get('application.domain')}`,
+        email: `admin@${config.get<string>('application.domain')}`,
         password: 'admin123'
       }
     })
@@ -109,7 +110,7 @@ describe('/api/Quantitys', () => {
     return frisby.post(`${REST_URL}/user/login`, {
       headers: jsonHeader,
       body: {
-        email: `accountant@${config.get('application.domain')}`,
+        email: `accountant@${config.get<string>('application.domain')}`,
         password: 'i am an awesome accountant'
       }
     })
@@ -132,7 +133,7 @@ describe('/api/Quantitys/:ids', () => {
     return frisby.post(`${REST_URL}/user/login`, {
       headers: jsonHeader,
       body: {
-        email: `jim@${config.get('application.domain')}`,
+        email: `jim@${config.get<string>('application.domain')}`,
         password: 'ncc-1701'
       }
     })
@@ -150,7 +151,7 @@ describe('/api/Quantitys/:ids', () => {
     return frisby.post(`${REST_URL}/user/login`, {
       headers: jsonHeader,
       body: {
-        email: `admin@${config.get('application.domain')}`,
+        email: `admin@${config.get<string>('application.domain')}`,
         password: 'admin123'
       }
     })
@@ -164,11 +165,28 @@ describe('/api/Quantitys/:ids', () => {
       })
   })
 
-  it('GET quantity of all items for accounting users', () => {
+  it('GET quantity of all items for accounting users blocked by IP filter', () => {
     return frisby.post(`${REST_URL}/user/login`, {
       headers: jsonHeader,
       body: {
-        email: `accountant@${config.get('application.domain')}`,
+        email: `accountant@${config.get<string>('application.domain')}`,
+        password: 'i am an awesome accountant'
+      }
+    })
+      .expect('status', 200)
+      .then(({ json }) => {
+        return frisby.get(`${API_URL}/Quantitys/1`, {
+          headers: { Authorization: `Bearer ${json.authentication.token}`, 'content-type': 'application/json' }
+        })
+          .expect('status', 403)
+      })
+  })
+
+  xit('GET quantity of all items for accounting users from IP 123.456.789', () => { // TODO Check if possible to set IP in frisby tests
+    return frisby.post(`${REST_URL}/user/login`, {
+      headers: jsonHeader,
+      body: {
+        email: `accountant@${config.get<string>('application.domain')}`,
         password: 'i am an awesome accountant'
       }
     })
@@ -185,7 +203,7 @@ describe('/api/Quantitys/:ids', () => {
     return frisby.post(`${REST_URL}/user/login`, {
       headers: jsonHeader,
       body: {
-        email: `jim@${config.get('application.domain')}`,
+        email: `jim@${config.get<string>('application.domain')}`,
         password: 'ncc-1701'
       }
     })
@@ -206,7 +224,7 @@ describe('/api/Quantitys/:ids', () => {
     return frisby.post(`${REST_URL}/user/login`, {
       headers: jsonHeader,
       body: {
-        email: `jim@${config.get('application.domain')}`,
+        email: `jim@${config.get<string>('application.domain')}`,
         password: 'ncc-1701'
       }
     })
@@ -223,11 +241,31 @@ describe('/api/Quantitys/:ids', () => {
       })
   })
 
-  it('PUT quantity as accounting user', () => {
+  it('PUT quantity as accounting user blocked by IP filter', () => {
     return frisby.post(`${REST_URL}/user/login`, {
       headers: jsonHeader,
       body: {
-        email: `accountant@${config.get('application.domain')}`,
+        email: `accountant@${config.get<string>('application.domain')}`,
+        password: 'i am an awesome accountant'
+      }
+    })
+      .expect('status', 200)
+      .then(({ json }) => {
+        return frisby.put(`${API_URL}/Quantitys/1`, {
+          headers: { Authorization: `Bearer ${json.authentication.token}`, 'content-type': 'application/json' },
+          body: {
+            quantity: 100
+          }
+        })
+          .expect('status', 403)
+      })
+  })
+
+  xit('PUT quantity as accounting user from IP 123.456.789', () => { // TODO Check if possible to set IP in frisby tests
+    return frisby.post(`${REST_URL}/user/login`, {
+      headers: jsonHeader,
+      body: {
+        email: `accountant@${config.get<string>('application.domain')}`,
         password: 'i am an awesome accountant'
       }
     })
@@ -250,7 +288,7 @@ describe('/api/Quantitys/:ids', () => {
     return frisby.post(`${REST_URL}/user/login`, {
       headers: jsonHeader,
       body: {
-        email: `accountant@${config.get('application.domain')}`,
+        email: `accountant@${config.get<string>('application.domain')}`,
         password: 'i am an awesome accountant'
       }
     })
@@ -267,7 +305,7 @@ describe('/api/Quantitys/:ids', () => {
     return frisby.post(`${REST_URL}/user/login`, {
       headers: jsonHeader,
       body: {
-        email: `admin@${config.get('application.domain')}`,
+        email: `admin@${config.get<string>('application.domain')}`,
         password: 'admin123'
       }
     })
@@ -284,7 +322,7 @@ describe('/api/Quantitys/:ids', () => {
     return frisby.post(`${REST_URL}/user/login`, {
       headers: jsonHeader,
       body: {
-        email: `jim@${config.get('application.domain')}`,
+        email: `jim@${config.get<string>('application.domain')}`,
         password: 'ncc-1701'
       }
     })

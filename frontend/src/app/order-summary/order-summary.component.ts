@@ -1,20 +1,28 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
-import { Component, NgZone, OnInit } from '@angular/core'
+import { Component, NgZone, type OnInit } from '@angular/core'
 import { AddressService } from '../Services/address.service'
 import { PaymentService } from '../Services/payment.service'
 import { BasketService } from '../Services/basket.service'
 import { Router } from '@angular/router'
 import { DeliveryService } from '../Services/delivery.service'
 import { SnackBarHelperService } from '../Services/snack-bar-helper.service'
+import { MatIconModule } from '@angular/material/icon'
+import { MatButtonModule } from '@angular/material/button'
+import { PurchaseBasketComponent } from '../purchase-basket/purchase-basket.component'
+import { TranslateModule } from '@ngx-translate/core'
+import { NgIf } from '@angular/common'
+import { FlexModule } from '@angular/flex-layout/flex'
+import { MatCardModule } from '@angular/material/card'
 
 @Component({
   selector: 'app-order-summary',
   templateUrl: './order-summary.component.html',
-  styleUrls: ['./order-summary.component.scss']
+  styleUrls: ['./order-summary.component.scss'],
+  imports: [MatCardModule, FlexModule, NgIf, TranslateModule, PurchaseBasketComponent, MatButtonModule, MatIconModule]
 })
 export class OrderSummaryComponent implements OnInit {
   public bonus = 0
@@ -25,20 +33,20 @@ export class OrderSummaryComponent implements OnInit {
   public paymentMethod: any
   constructor (private readonly router: Router, private readonly addressService: AddressService, private readonly paymentService: PaymentService, private readonly basketService: BasketService, private readonly deliveryService: DeliveryService, private readonly ngZone: NgZone, private readonly snackBarHelperService: SnackBarHelperService) { }
 
-  ngOnInit () {
+  ngOnInit (): void {
     this.deliveryService.getById(sessionStorage.getItem('deliveryMethodId')).subscribe((method) => {
       this.deliveryPrice = method.price
     })
 
     this.addressService.getById(sessionStorage.getItem('addressId')).subscribe((address) => {
       this.address = address
-    }, (error) => console.log(error))
+    }, (error) => { console.log(error) })
 
     if (sessionStorage.getItem('paymentId') !== 'wallet') {
       this.paymentService.getById(sessionStorage.getItem('paymentId')).subscribe((card) => {
         card.cardNum = String(card.cardNum).substring(String(card.cardNum).length - 4)
         this.paymentMethod = card
-      }, (err) => console.log(err))
+      }, (err) => { console.log(err) })
     } else if (sessionStorage.getItem('paymentId') === 'wallet') {
       this.paymentMethod = 'wallet'
     }

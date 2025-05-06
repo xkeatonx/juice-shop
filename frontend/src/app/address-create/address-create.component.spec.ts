@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core'
-import { HttpClientTestingModule } from '@angular/common/http/testing'
+import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { MatCardModule } from '@angular/material/card'
 import { MatFormFieldModule } from '@angular/material/form-field'
-import { ComponentFixture, fakeAsync, TestBed, waitForAsync } from '@angular/core/testing'
+import { type ComponentFixture, fakeAsync, TestBed, waitForAsync } from '@angular/core/testing'
 import { AddressCreateComponent } from './address-create.component'
 import { MatInputModule } from '@angular/material/input'
 import { ReactiveFormsModule } from '@angular/forms'
@@ -20,6 +20,7 @@ import { MatGridListModule } from '@angular/material/grid-list'
 import { EventEmitter } from '@angular/core'
 import { MatIconModule } from '@angular/material/icon'
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar'
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 describe('AddressCreateComponent', () => {
   let component: AddressCreateComponent
@@ -42,25 +43,23 @@ describe('AddressCreateComponent', () => {
     snackBar.open.and.returnValue(null)
 
     TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule,
+      imports: [RouterTestingModule,
         TranslateModule.forRoot(),
-        HttpClientTestingModule,
         ReactiveFormsModule,
-
         BrowserAnimationsModule,
         MatCardModule,
         MatFormFieldModule,
         MatInputModule,
         MatGridListModule,
         MatIconModule,
-        MatSnackBarModule
-      ],
-      declarations: [AddressCreateComponent],
+        MatSnackBarModule,
+        AddressCreateComponent],
       providers: [
         { provide: AddressService, useValue: addressService },
         { provide: TranslateService, useValue: translateService },
-        { provide: MatSnackBar, useValue: snackBar }
+        { provide: MatSnackBar, useValue: snackBar },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
       ]
     })
       .compileComponents()

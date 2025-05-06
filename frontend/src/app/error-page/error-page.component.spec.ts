@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { type ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 import { MatCardModule } from '@angular/material/card'
 
 import { ErrorPageComponent } from './error-page.component'
@@ -16,10 +16,10 @@ describe('ErrorPageComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ErrorPageComponent],
       imports: [
         TranslateModule.forRoot(),
-        MatCardModule
+        MatCardModule,
+        ErrorPageComponent
       ],
       providers: [
         {

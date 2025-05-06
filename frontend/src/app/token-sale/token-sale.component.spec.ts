@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
-import { ComponentFixture, fakeAsync, TestBed, waitForAsync } from '@angular/core/testing'
+import { type ComponentFixture, fakeAsync, TestBed, waitForAsync } from '@angular/core/testing'
 import { TranslateModule } from '@ngx-translate/core'
 import { TokenSaleComponent } from './token-sale.component'
 import { of, throwError } from 'rxjs'
@@ -20,11 +20,11 @@ describe('TokenSaleComponent', () => {
     configurationService = jasmine.createSpyObj('ConfigurationService', ['getApplicationConfiguration'])
     configurationService.getApplicationConfiguration.and.returnValue(of({ application: { } }))
     TestBed.configureTestingModule({
-      declarations: [TokenSaleComponent],
       imports: [
         TranslateModule.forRoot(),
         MatCardModule,
-        MatButtonModule
+        MatButtonModule,
+        TokenSaleComponent
       ],
       providers: [
         { provide: ConfigurationService, useValue: configurationService }

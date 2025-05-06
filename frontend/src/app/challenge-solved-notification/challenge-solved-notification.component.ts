@@ -1,15 +1,20 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
-import { TranslateService } from '@ngx-translate/core'
+import { TranslateService, TranslateModule } from '@ngx-translate/core'
 import { ChallengeService } from '../Services/challenge.service'
 import { ConfigurationService } from '../Services/configuration.service'
-import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core'
-import { CookieService } from 'ngx-cookie'
-import { CountryMappingService } from 'src/app/Services/country-mapping.service'
+import { ChangeDetectorRef, Component, NgZone, type OnInit } from '@angular/core'
+import { CookieService } from 'ngy-cookie'
+import { CountryMappingService } from '../Services/country-mapping.service'
 import { SocketIoService } from '../Services/socket-io.service'
+import { ClipboardModule } from 'ngx-clipboard'
+import { MatIconModule } from '@angular/material/icon'
+import { MatButtonModule } from '@angular/material/button'
+import { MatCardModule } from '@angular/material/card'
+import { NgIf, LowerCasePipe } from '@angular/common'
 
 interface ChallengeSolvedMessage {
   challenge: string
@@ -20,6 +25,7 @@ interface ChallengeSolvedMessage {
 }
 
 interface ChallengeSolvedNotification {
+  key: string
   message: string
   flag: string
   country?: { code: string, name: string }
@@ -29,7 +35,8 @@ interface ChallengeSolvedNotification {
 @Component({
   selector: 'app-challenge-solved-notification',
   templateUrl: './challenge-solved-notification.component.html',
-  styleUrls: ['./challenge-solved-notification.component.scss']
+  styleUrls: ['./challenge-solved-notification.component.scss'],
+  imports: [MatCardModule, MatButtonModule, MatIconModule, ClipboardModule, NgIf, LowerCasePipe, TranslateModule]
 })
 export class ChallengeSolvedNotificationComponent implements OnInit {
   public notifications: ChallengeSolvedNotification[] = []
@@ -40,7 +47,7 @@ export class ChallengeSolvedNotificationComponent implements OnInit {
   constructor (private readonly ngZone: NgZone, private readonly configurationService: ConfigurationService, private readonly challengeService: ChallengeService, private readonly countryMappingService: CountryMappingService, private readonly translate: TranslateService, private readonly cookieService: CookieService, private readonly ref: ChangeDetectorRef, private readonly io: SocketIoService) {
   }
 
-  ngOnInit () {
+  ngOnInit (): void {
     this.ngZone.runOutsideAngular(() => {
       this.io.socket().on('challenge solved', (data: ChallengeSolvedMessage) => {
         if (data?.challenge) {
@@ -49,9 +56,11 @@ export class ChallengeSolvedNotificationComponent implements OnInit {
           }
           if (!data.isRestore) {
             this.saveProgress()
-            import('../../confetti').then(module => {
-              module.shootConfetti()
-            })
+            if (!data.hidden) {
+              import('../../confetti').then(module => {
+                module.shootConfetti()
+              })
+            }
           }
           this.io.socket().emit('notification received', data.flag)
         }
@@ -72,7 +81,7 @@ export class ChallengeSolvedNotificationComponent implements OnInit {
           if (config.ctf.showCountryDetailsInNotifications !== 'none') {
             this.countryMappingService.getCountryMapping().subscribe((countryMap: any) => {
               this.countryMap = countryMap
-            }, (err) => console.log(err))
+            }, (err) => { console.log(err) })
           }
         } else {
           this.showCtfCountryDetailsInNotifications = 'none'
@@ -83,6 +92,9 @@ export class ChallengeSolvedNotificationComponent implements OnInit {
 
   closeNotification (index: number, shiftKey: boolean = false) {
     if (shiftKey) {
+      this.ngZone.runOutsideAngular(() => {
+        this.io.socket().emit('verifyCloseNotificationsChallenge', this.notifications)
+      })
       this.notifications = []
     } else {
       this.notifications.splice(index, 1)
@@ -98,9 +110,10 @@ export class ChallengeSolvedNotificationComponent implements OnInit {
         country = this.countryMap[challenge.key]
       }
       this.notifications.push({
-        message: message,
+        message,
+        key: challenge.key,
         flag: challenge.flag,
-        country: country,
+        country,
         copied: false
       })
       this.ref.detectChanges()
@@ -110,11 +123,11 @@ export class ChallengeSolvedNotificationComponent implements OnInit {
   saveProgress () {
     this.challengeService.continueCode().subscribe((continueCode) => {
       if (!continueCode) {
-        throw (new Error('Received invalid continue code from the sever!'))
+        throw (new Error('Received invalid continue code from the server!'))
       }
       const expires = new Date()
       expires.setFullYear(expires.getFullYear() + 1)
       this.cookieService.put('continueCode', continueCode, { expires })
-    }, (err) => console.log(err))
+    }, (err) => { console.log(err) })
   }
 }

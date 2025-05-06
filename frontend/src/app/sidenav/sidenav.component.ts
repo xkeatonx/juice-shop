@@ -1,24 +1,33 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
 import { environment } from '../../environments/environment'
 import { ChallengeService } from '../Services/challenge.service'
-import { Component, EventEmitter, NgZone, OnInit, Output } from '@angular/core'
+import { Component, EventEmitter, NgZone, type OnInit, Output } from '@angular/core'
 import { SocketIoService } from '../Services/socket-io.service'
 import { AdministrationService } from '../Services/administration.service'
-import { Router } from '@angular/router'
+import { Router, RouterLink } from '@angular/router'
 import { UserService } from '../Services/user.service'
-import { CookieService } from 'ngx-cookie'
+import { CookieService } from 'ngy-cookie'
 import { ConfigurationService } from '../Services/configuration.service'
 import { LoginGuard } from '../app.guard'
 import { roles } from '../roles'
+import { MatDivider } from '@angular/material/divider'
+import { MatIconModule } from '@angular/material/icon'
+import { NgIf, NgClass } from '@angular/common'
+import { ExtendedModule } from '@angular/flex-layout/extended'
+import { TranslateModule } from '@ngx-translate/core'
+import { MatButtonModule } from '@angular/material/button'
+import { MatNavList, MatListSubheaderCssMatStyler, MatListItem } from '@angular/material/list'
+import { MatToolbar, MatToolbarRow } from '@angular/material/toolbar'
 
 @Component({
   selector: 'sidenav',
   templateUrl: './sidenav.component.html',
-  styleUrls: ['./sidenav.component.scss']
+  styleUrls: ['./sidenav.component.scss'],
+  imports: [MatToolbar, MatToolbarRow, MatNavList, MatButtonModule, MatListSubheaderCssMatStyler, TranslateModule, ExtendedModule, NgIf, MatListItem, RouterLink, MatIconModule, NgClass, MatDivider]
 })
 export class SidenavComponent implements OnInit {
   public applicationName = 'OWASP Juice Shop'
@@ -30,20 +39,19 @@ export class SidenavComponent implements OnInit {
   public showOrdersSubmenu: boolean = false
   public isShowing = false
   public offerScoreBoardTutorial: boolean = false
-
   @Output() public sidenavToggle = new EventEmitter()
 
   constructor (private readonly administrationService: AdministrationService, private readonly challengeService: ChallengeService,
     private readonly ngZone: NgZone, private readonly io: SocketIoService, private readonly userService: UserService, private readonly cookieService: CookieService,
     private readonly router: Router, private readonly configurationService: ConfigurationService, private readonly loginGuard: LoginGuard) { }
 
-  ngOnInit () {
+  ngOnInit (): void {
     this.administrationService.getApplicationVersion().subscribe((version: any) => {
       if (version) {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         this.version = `v${version}`
       }
-    }, (err) => console.log(err))
+    }, (err) => { console.log(err) })
     this.getApplicationDetails()
     this.getScoreBoardStatus()
 
@@ -74,7 +82,7 @@ export class SidenavComponent implements OnInit {
   }
 
   logout () {
-    this.userService.saveLastLoginIp().subscribe((user: any) => { this.noop() }, (err) => console.log(err))
+    this.userService.saveLastLoginIp().subscribe((user: any) => { this.noop() }, (err) => { console.log(err) })
     localStorage.removeItem('token')
     this.cookieService.remove('token')
     sessionStorage.removeItem('bid')
@@ -99,13 +107,13 @@ export class SidenavComponent implements OnInit {
       this.ngZone.run(() => {
         this.scoreBoardVisible = challenges[0].solved
       })
-    }, (err) => console.log(err))
+    }, (err) => { console.log(err) })
   }
 
   getUserDetails () {
     this.userService.whoAmI().subscribe((user: any) => {
       this.userEmail = user.email
-    }, (err) => console.log(err))
+    }, (err) => { console.log(err) })
   }
 
   onToggleSidenav = () => {
@@ -123,7 +131,7 @@ export class SidenavComponent implements OnInit {
       if (config?.application.welcomeBanner.showOnFirstStart && config.hackingInstructor.isEnabled) {
         this.offerScoreBoardTutorial = config.application.welcomeBanner.showOnFirstStart && config.hackingInstructor.isEnabled
       }
-    }, (err) => console.log(err))
+    }, (err) => { console.log(err) })
   }
 
   isAccounting () {

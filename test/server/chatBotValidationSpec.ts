@@ -1,15 +1,16 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
-import chai = require('chai')
-const sinonChai = require('sinon-chai')
+import chai from 'chai'
+import sinonChai from 'sinon-chai'
+
+import validateChatBot, { checkIntentWithFunctionHandlerExists } from '../../lib/startup/validateChatBot'
+import botDefaultTrainingData from '../../data/static/botDefaultTrainingData.json'
+
 const expect = chai.expect
 chai.use(sinonChai)
-
-const validateChatBot = require('../../lib/startup/validateChatBot')
-const { checkIntentWithFunctionHandlerExists } = require('../../lib/startup/validateChatBot')
 
 describe('chatBotValidation', () => {
   describe('checkIntentWithHandlerExists', () => {
@@ -40,7 +41,7 @@ describe('chatBotValidation', () => {
         ]
       }
 
-      expect(checkIntentWithFunctionHandlerExists(trainingData, 'queries.test')).to.equal(false)
+      expect(checkIntentWithFunctionHandlerExists(trainingData, 'queries.test', 'testFunction')).to.equal(false)
     })
 
     it('should fail if the training data lacks the expected handler for the given intent', () => {
@@ -63,7 +64,7 @@ describe('chatBotValidation', () => {
   })
 
   it('should accept the default chatbot training data', () => {
-    expect(validateChatBot(require('../../data/static/botDefaultTrainingData.json'))).to.equal(true)
+    expect(validateChatBot(botDefaultTrainingData)).to.equal(true)
   })
 
   it('should fail if the chatbot training data is empty', () => {

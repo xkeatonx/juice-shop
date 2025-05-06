@@ -1,21 +1,29 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
 import { ProductService } from '../Services/product.service'
-import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core'
+import { type AfterViewInit, Component, type OnDestroy, ViewChild } from '@angular/core'
 import { MatPaginator } from '@angular/material/paginator'
-import { Subscription } from 'rxjs'
-import { MatTableDataSource } from '@angular/material/table'
+import { type Subscription } from 'rxjs'
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table'
 import { QuantityService } from '../Services/quantity.service'
-import { dom, library } from '@fortawesome/fontawesome-svg-core'
+import { library } from '@fortawesome/fontawesome-svg-core'
 import { faCheck } from '@fortawesome/free-solid-svg-icons'
 import { OrderHistoryService } from '../Services/order-history.service'
 import { SnackBarHelperService } from '../Services/snack-bar-helper.service'
+import { MatInputModule } from '@angular/material/input'
+import { MatFormFieldModule, MatSuffix } from '@angular/material/form-field'
+import { MatIconModule } from '@angular/material/icon'
+import { MatTooltip } from '@angular/material/tooltip'
+import { MatIconButton } from '@angular/material/button'
+import { NgIf } from '@angular/common'
+import { FlexModule } from '@angular/flex-layout/flex'
+import { TranslateModule } from '@ngx-translate/core'
+import { MatCardModule } from '@angular/material/card'
 
 library.add(faCheck)
-dom.watch()
 
 interface Order {
   id: string
@@ -27,7 +35,8 @@ interface Order {
 @Component({
   selector: 'app-accounting',
   templateUrl: './accounting.component.html',
-  styleUrls: ['./accounting.component.scss']
+  styleUrls: ['./accounting.component.scss'],
+  imports: [MatCardModule, TranslateModule, FlexModule, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, NgIf, MatIconButton, MatTooltip, MatIconModule, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFormFieldModule, MatInputModule, MatSuffix]
 })
 export class AccountingComponent implements AfterViewInit, OnDestroy {
   public orderHistoryColumns = ['OrderId', 'Price', 'Status', 'StatusButton']
@@ -58,7 +67,7 @@ export class AccountingComponent implements AfterViewInit, OnDestroy {
           quantity: item.quantity
         }
       })
-    }, (err) => console.log(err))
+    }, (err) => { console.log(err) })
   }
 
   loadProducts () {
@@ -66,7 +75,7 @@ export class AccountingComponent implements AfterViewInit, OnDestroy {
       this.tableData = tableData
       this.dataSource = new MatTableDataSource<Element>(this.tableData)
       this.dataSource.paginator = this.paginator
-    }, (err) => console.log(err))
+    }, (err) => { console.log(err) })
   }
 
   loadOrders () {
@@ -82,7 +91,7 @@ export class AccountingComponent implements AfterViewInit, OnDestroy {
       }
       this.orderSource = new MatTableDataSource<Order>(this.orderData)
       this.orderSource.paginator = this.paginatorOrderHistory
-    }, (err) => console.log(err))
+    }, (err) => { console.log(err) })
   }
 
   ngOnDestroy () {
@@ -120,7 +129,7 @@ export class AccountingComponent implements AfterViewInit, OnDestroy {
   }
 
   changeDeliveryStatus (deliveryStatus, orderId) {
-    this.orderHistoryService.toggleDeliveryStatus(orderId, { deliveryStatus: deliveryStatus }).subscribe(() => {
+    this.orderHistoryService.toggleDeliveryStatus(orderId, { deliveryStatus }).subscribe(() => {
       this.loadOrders()
     }, (err) => {
       this.snackBarHelperService.open(err, 'errorBar')

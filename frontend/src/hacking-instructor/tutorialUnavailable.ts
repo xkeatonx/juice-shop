@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
 import {
   waitInMs
 } from './helpers/helpers'
-import { ChallengeInstruction } from './'
+import { type ChallengeInstruction } from './'
 
 export const TutorialUnavailableInstruction: ChallengeInstruction = {
   name: null,
@@ -19,7 +19,7 @@ export const TutorialUnavailableInstruction: ChallengeInstruction = {
     },
     {
       text:
-        '✍️ Do you want to contribute a tutorial for this challenge? [Check out our documentation](https://pwning.owasp-juice.shop/part3/tutorials.html) to learn how! 🏫',
+        '✍️ Do you want to contribute a tutorial for this challenge? [Check out our documentation](https://pwning.owasp-juice.shop/companion-guide/latest/part5/tutorials.html) to learn how! 🏫',
       fixture: 'app-navbar',
       resolved: waitInMs(15000)
     },

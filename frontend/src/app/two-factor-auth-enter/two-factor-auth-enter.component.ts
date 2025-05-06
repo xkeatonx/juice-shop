@@ -1,19 +1,27 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
 import { Component, NgZone } from '@angular/core'
-import { FormControl, FormGroup, Validators } from '@angular/forms'
+import { UntypedFormControl, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { TwoFactorAuthService } from '../Services/two-factor-auth-service'
-import { CookieService } from 'ngx-cookie'
+import { CookieService } from 'ngy-cookie'
 import { UserService } from '../Services/user.service'
 import { Router } from '@angular/router'
-import { dom, library } from '@fortawesome/fontawesome-svg-core'
+import { library } from '@fortawesome/fontawesome-svg-core'
 import { faUnlockAlt } from '@fortawesome/free-solid-svg-icons'
+import { MatButtonModule } from '@angular/material/button'
+import { MatTooltip } from '@angular/material/tooltip'
+import { MatIconModule } from '@angular/material/icon'
+import { MatInputModule } from '@angular/material/input'
+import { MatFormFieldModule, MatLabel, MatSuffix, MatHint, MatError } from '@angular/material/form-field'
+import { NgIf } from '@angular/common'
+import { TranslateModule } from '@ngx-translate/core'
+import { MatCardModule } from '@angular/material/card'
+import { FlexModule } from '@angular/flex-layout/flex'
 
 library.add(faUnlockAlt)
-dom.watch()
 
 interface TokenEnterFormFields {
   token: string
@@ -22,14 +30,15 @@ interface TokenEnterFormFields {
 @Component({
   selector: 'app-two-factor-auth-enter',
   templateUrl: './two-factor-auth-enter.component.html',
-  styleUrls: ['./two-factor-auth-enter.component.scss']
+  styleUrls: ['./two-factor-auth-enter.component.scss'],
+  imports: [FlexModule, MatCardModule, TranslateModule, NgIf, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatLabel, MatInputModule, MatIconModule, MatSuffix, MatTooltip, MatHint, MatError, MatButtonModule, MatIconModule]
 })
 export class TwoFactorAuthEnterComponent {
-  public twoFactorForm: FormGroup = new FormGroup({
-    token: new FormControl('', [Validators.minLength(6), Validators.maxLength(6), Validators.required, Validators.pattern('^[\\d]{6}$')])
+  public twoFactorForm: UntypedFormGroup = new UntypedFormGroup({
+    token: new UntypedFormControl('', [Validators.minLength(6), Validators.maxLength(6), Validators.required, Validators.pattern('^[\\d]{6}$')])
   })
 
-  public errored: Boolean = false
+  public errored: boolean = false
 
   constructor (
     private readonly twoFactorAuthService: TwoFactorAuthService,

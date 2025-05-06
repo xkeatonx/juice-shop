@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
-import { CookieModule, CookieService } from 'ngx-cookie'
-import { HttpClientTestingModule } from '@angular/common/http/testing'
+import { CookieModule, CookieService } from 'ngy-cookie'
+import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { TranslateModule, TranslateService } from '@ngx-translate/core'
 import { MatButtonModule } from '@angular/material/button'
 import { MatCardModule } from '@angular/material/card'
-import { ComponentFixture, fakeAsync, TestBed, waitForAsync } from '@angular/core/testing'
+import { type ComponentFixture, fakeAsync, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { ServerStartedNotificationComponent } from './server-started-notification.component'
 import { ChallengeService } from '../Services/challenge.service'
@@ -16,9 +16,10 @@ import { SocketIoService } from '../Services/socket-io.service'
 import { of, throwError } from 'rxjs'
 import { EventEmitter } from '@angular/core'
 import { MatIconModule } from '@angular/material/icon'
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 class MockSocket {
-  on (str: string, callback: Function) {
+  on (str: string, callback: any) {
     callback()
   }
 }
@@ -45,20 +46,19 @@ describe('ServerStartedNotificationComponent', () => {
     socketIoService.socket.and.returnValue(mockSocket)
 
     TestBed.configureTestingModule({
-      imports: [
-        TranslateModule.forRoot(),
+      imports: [TranslateModule.forRoot(),
         CookieModule.forRoot(),
-        HttpClientTestingModule,
         MatCardModule,
         MatButtonModule,
-        MatIconModule
-      ],
-      declarations: [ServerStartedNotificationComponent],
+        MatIconModule,
+        ServerStartedNotificationComponent],
       providers: [
         { provide: ChallengeService, useValue: challengeService },
         { provide: TranslateService, useValue: translateService },
         { provide: SocketIoService, useValue: socketIoService },
-        CookieService
+        CookieService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
       ]
     })
       .compileComponents()

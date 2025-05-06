@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
-import { Request, Response, NextFunction } from 'express'
-import { Captcha } from '../data/types'
+import { type Request, type Response, type NextFunction } from 'express'
+import { type Captcha } from '../data/types'
 import { CaptchaModel } from '../models/captcha'
 
-function captchas () {
+export function captchas () {
   return async (req: Request, res: Response) => {
     const captchaId = req.app.locals.captchaId++
     const operators = ['*', '+', '-']
@@ -23,9 +23,9 @@ function captchas () {
     const answer = eval(expression).toString() // eslint-disable-line no-eval
 
     const captcha = {
-      captchaId: captchaId,
+      captchaId,
       captcha: expression,
-      answer: answer
+      answer
     }
     const captchaInstance = CaptchaModel.build(captcha)
     await captchaInstance.save()
@@ -33,9 +33,9 @@ function captchas () {
   }
 }
 
-captchas.verifyCaptcha = () => (req: Request, res: Response, next: NextFunction) => {
+export const verifyCaptcha = () => (req: Request, res: Response, next: NextFunction) => {
   CaptchaModel.findOne({ where: { captchaId: req.body.captchaId } }).then((captcha: Captcha | null) => {
-    if (captcha && req.body.captcha === captcha.answer) {
+    if ((captcha != null) && req.body.captcha === captcha.answer) {
       next()
     } else {
       res.status(401).send(res.__('Wrong answer to CAPTCHA. Please try again.'))
@@ -44,5 +44,3 @@ captchas.verifyCaptcha = () => (req: Request, res: Response, next: NextFunction)
     next(error)
   })
 }
-
-module.exports = captchas

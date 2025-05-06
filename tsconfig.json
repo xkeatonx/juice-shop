@@ -4,7 +4,7 @@
     "outDir": "./build",
     "allowJs": true,
     "module": "commonjs",
-    "target": "es2018",
+    "target": "es2020",
     "moduleResolution": "node",
     "sourceMap": true,
     "strict": true,
@@ -13,11 +13,11 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "lib": [
-      "es2018",
-      "dom"
+      "es2020"
     ]
   },
-  "include" : [
+  "include": [
+    "cypress/**/*.ts",
     "data/**/*.ts",
     "lib/**/*.ts",
     "lib/**/*.js",
@@ -27,8 +27,7 @@
     "views/**/*.ts",
     "views/**/*.js",
     "rsn/**/*.ts",
-    "*.ts",
-    "*.js"
+    "*.ts"
   ],
   "exclude": [
     "node_modules",
@@ -37,7 +36,6 @@
     "build",
     "vagrant",
     "data/static/codefixes/**",
-    "**/*.d.ts",
-    ".eslintrc.js"
+    "**/*.d.ts"
   ]
 }

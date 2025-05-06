@@ -1,18 +1,18 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
-import { Request, Response, NextFunction } from 'express'
+import { type Request, type Response, type NextFunction } from 'express'
+
+import * as challengeUtils from '../lib/challengeUtils'
+import { type ProductModel } from '../models/product'
 import { MemoryModel } from '../models/memory'
-import { ProductModel } from '../models/product'
+import { challenges } from '../data/datacache'
+import * as security from '../lib/insecurity'
+import * as db from '../data/mongodb'
 
-const utils = require('../lib/utils')
-const security = require('../lib/insecurity')
-const db = require('../data/mongodb')
-const challenges = require('../data/datacache').challenges
-
-module.exports = function dataExport () {
+export function dataExport () {
   return async (req: Request, res: Response, next: NextFunction) => {
     const loggedInUser = security.authenticatedUsers.get(req.headers?.authorization?.replace('Bearer ', ''))
     if (loggedInUser?.data?.email && loggedInUser.data.id) {
@@ -21,7 +21,7 @@ module.exports = function dataExport () {
       const updatedEmail = email.replace(/[aeiou]/gi, '*')
       const userData:
       {
-        username: string
+        username?: string
         email: string
         orders: Array<{
           orderId: string
@@ -58,7 +58,7 @@ module.exports = function dataExport () {
         })
       })
 
-      db.orders.find({ email: updatedEmail }).then((orders: Array<{
+      db.ordersCollection.find({ email: updatedEmail }).then((orders: Array<{
         orderId: string
         totalPrice: number
         products: ProductModel[]
@@ -77,7 +77,7 @@ module.exports = function dataExport () {
           })
         }
 
-        db.reviews.find({ author: email }).then((reviews: Array<{
+        db.reviewsCollection.find({ author: email }).then((reviews: Array<{
           message: string
           author: string
           product: number
@@ -97,7 +97,7 @@ module.exports = function dataExport () {
           }
           const emailHash = security.hash(email).slice(0, 4)
           for (const order of userData.orders) {
-            utils.solveIf(challenges.dataExportChallenge, () => { return order.orderId.split('-')[0] !== emailHash })
+            challengeUtils.solveIf(challenges.dataExportChallenge, () => { return order.orderId.split('-')[0] !== emailHash })
           }
           res.status(200).send({ userData: JSON.stringify(userData, null, 2), confirmation: 'Your data export will open in a new Browser window.' })
         },
@@ -109,7 +109,7 @@ module.exports = function dataExport () {
         next(new Error(`Error retrieving orders for ${updatedEmail}`))
       })
     } else {
-      next(new Error('Blocked illegal activity by ' + req.connection.remoteAddress))
+      next(new Error('Blocked illegal activity by ' + req.socket.remoteAddress))
     }
   }
 }

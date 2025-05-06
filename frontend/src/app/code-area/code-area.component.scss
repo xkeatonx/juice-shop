@@ -2,14 +2,10 @@
 
 #emphasize {
   float: left;
-  padding: 0.5em;
-}
-
-#code {
-  width: 60em;
-  // height: 50em;
+  padding: 1em 0.5em;
 }
 
 .lineMarker {
+  color: #fff; // needs to be completly white, otherwise the emojis colors just look dull
   cursor: pointer;
 }

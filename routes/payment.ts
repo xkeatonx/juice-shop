@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
-import { Request, Response, NextFunction } from 'express'
+import { type Request, type Response, type NextFunction } from 'express'
 import { CardModel } from '../models/card'
 
-interface displayCard{
+interface displayCard {
   UserId: number
   id: number
   fullName: string
@@ -15,7 +15,7 @@ interface displayCard{
   expYear: number
 }
 
-module.exports.getPaymentMethods = function getPaymentMethods () {
+export function getPaymentMethods () {
   return async (req: Request, res: Response, next: NextFunction) => {
     const displayableCards: displayCard[] = []
     const cards = await CardModel.findAll({ where: { UserId: req.body.UserId } })
@@ -36,7 +36,7 @@ module.exports.getPaymentMethods = function getPaymentMethods () {
   }
 }
 
-module.exports.getPaymentMethodById = function getPaymentMethodById () {
+export function getPaymentMethodById () {
   return async (req: Request, res: Response, next: NextFunction) => {
     const card = await CardModel.findOne({ where: { id: req.params.id, UserId: req.body.UserId } })
     const displayableCard: displayCard = {
@@ -47,7 +47,7 @@ module.exports.getPaymentMethodById = function getPaymentMethodById () {
       expMonth: 0,
       expYear: 0
     }
-    if (card) {
+    if (card != null) {
       displayableCard.UserId = card.UserId
       displayableCard.id = card.id
       displayableCard.fullName = card.fullName
@@ -57,7 +57,7 @@ module.exports.getPaymentMethodById = function getPaymentMethodById () {
       const cardNumber = String(card.cardNum)
       displayableCard.cardNum = '*'.repeat(12) + cardNumber.substring(cardNumber.length - 4)
     }
-    if (card && displayableCard) {
+    if ((card != null) && displayableCard) {
       res.status(200).json({ status: 'success', data: displayableCard })
     } else {
       res.status(400).json({ status: 'error', data: 'Malicious activity detected' })
@@ -65,7 +65,7 @@ module.exports.getPaymentMethodById = function getPaymentMethodById () {
   }
 }
 
-module.exports.delPaymentMethodById = function delPaymentMethodById () {
+export function delPaymentMethodById () {
   return async (req: Request, res: Response, next: NextFunction) => {
     const card = await CardModel.destroy({ where: { id: req.params.id, UserId: req.body.UserId } })
     if (card) {

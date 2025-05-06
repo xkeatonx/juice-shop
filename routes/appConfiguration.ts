@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
-import config = require('config')
-import { Request, Response } from 'express'
+import config from 'config'
+import { type Request, type Response } from 'express'
 
-module.exports = function retrieveAppConfiguration () {
+export function retrieveAppConfiguration () {
   return (_req: Request, res: Response) => {
     res.json({ config })
   }

@@ -1,30 +1,37 @@
 /*
- * Copyright (c) 2014-2022 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
-import { FormControl, Validators } from '@angular/forms'
-import { Component, OnInit } from '@angular/core'
+import { UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { Component, type OnInit } from '@angular/core'
 import { FormSubmitService } from '../Services/form-submit.service'
 import { AddressService } from '../Services/address.service'
-import { ActivatedRoute, ParamMap, Router } from '@angular/router'
-import { Location } from '@angular/common'
-import { TranslateService } from '@ngx-translate/core'
+import { ActivatedRoute, type ParamMap, Router } from '@angular/router'
+import { Location, NgIf } from '@angular/common'
+import { TranslateService, TranslateModule } from '@ngx-translate/core'
 import { SnackBarHelperService } from '../Services/snack-bar-helper.service'
+import { MatIconModule } from '@angular/material/icon'
+import { MatButtonModule } from '@angular/material/button'
+import { MatInputModule } from '@angular/material/input'
+import { MatFormFieldModule, MatLabel, MatError, MatHint } from '@angular/material/form-field'
+import { MatCardModule } from '@angular/material/card'
+import { FlexModule } from '@angular/flex-layout/flex'
 
 @Component({
   selector: 'app-address-create',
   templateUrl: './address-create.component.html',
-  styleUrls: ['./address-create.component.scss']
+  styleUrls: ['./address-create.component.scss'],
+  imports: [FlexModule, MatCardModule, TranslateModule, MatFormFieldModule, MatLabel, MatInputModule, FormsModule, ReactiveFormsModule, NgIf, MatError, MatHint, MatButtonModule, MatIconModule]
 })
 export class AddressCreateComponent implements OnInit {
-  public countryControl: FormControl = new FormControl('', [Validators.required])
-  public nameControl: FormControl = new FormControl('', [Validators.required])
-  public numberControl: FormControl = new FormControl('', [Validators.required, Validators.min(1111111), Validators.max(9999999999)])
-  public pinControl: FormControl = new FormControl('', [Validators.required, Validators.maxLength(8)])
-  public addressControl: FormControl = new FormControl('', [Validators.required, Validators.maxLength(160)])
-  public cityControl: FormControl = new FormControl('', [Validators.required])
-  public stateControl: FormControl = new FormControl()
+  public countryControl: UntypedFormControl = new UntypedFormControl('', [Validators.required])
+  public nameControl: UntypedFormControl = new UntypedFormControl('', [Validators.required])
+  public numberControl: UntypedFormControl = new UntypedFormControl('', [Validators.required, Validators.min(1111111), Validators.max(9999999999)])
+  public pinControl: UntypedFormControl = new UntypedFormControl('', [Validators.required, Validators.maxLength(8)])
+  public addressControl: UntypedFormControl = new UntypedFormControl('', [Validators.required, Validators.maxLength(160)])
+  public cityControl: UntypedFormControl = new UntypedFormControl('', [Validators.required])
+  public stateControl: UntypedFormControl = new UntypedFormControl()
   public address: any = undefined
   public mode = 'create'
   private addressId: string = undefined
@@ -33,7 +40,7 @@ export class AddressCreateComponent implements OnInit {
     private readonly addressService: AddressService, private readonly router: Router, public activatedRoute: ActivatedRoute,
     private readonly translate: TranslateService, private readonly snackBarHelperService: SnackBarHelperService) { }
 
-  ngOnInit () {
+  ngOnInit (): void {
     this.address = {}
     this.activatedRoute.paramMap.subscribe((paramMap: ParamMap) => {
       if (paramMap.has('addressId')) {
@@ -47,7 +54,7 @@ export class AddressCreateComponent implements OnInit {
         this.addressId = null
       }
     })
-    this.formSubmitService.attachEnterKeyHandler('address-form', 'submitButton', () => this.save())
+    this.formSubmitService.attachEnterKeyHandler('address-form', 'submitButton', () => { this.save() })
   }
 
   save () {
